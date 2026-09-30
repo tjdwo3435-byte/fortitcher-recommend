@@ -396,6 +396,13 @@
 
   /* 결과 하단 이메일 받기 */
   .getmail.hidden{display:none;}
+  .getmail .agree{display:flex;align-items:center;gap:8px;margin:4px 0 10px;font-size:13px;color:var(--ink-2);cursor:pointer;}
+  .getmail .agree input{width:18px;height:18px;padding:0;accent-color:var(--accent);flex:0 0 auto;}
+  .getmail .agree span{flex:1 1 auto;line-height:1.4;}
+  .getmail .agree-more{border:none;background:none;color:var(--ink-3);font-size:12.5px;font-weight:700;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0;}
+  .getmail .agree-detail{background:var(--line-2);border-radius:10px;padding:10px 12px;margin:0 0 12px;}
+  .getmail .agree-detail p{font-size:12px;margin:0 0 4px;color:var(--ink-2);line-height:1.5;}
+  .getmail .agree-detail p:last-child{margin:0;}
   .more-btn{display:block;width:100%;margin-top:14px;border:1.5px solid var(--accent);background:#fff;color:var(--accent-press);border-radius:14px;padding:15px;font-size:15.5px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:-.02em;}
   .more-btn:active{background:var(--accent-soft);}
   .getmail{margin-top:22px;background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-lg);padding:18px;}
@@ -905,15 +912,23 @@
         '<div class="field"><input type="email" id="gEmail" placeholder="이메일 (예: teacher@school.com)" /></div>'+
         '<div class="field"><input type="tel" id="gPhone" inputmode="tel" placeholder="연락처 (예: 010-1234-5678)" /></div>'+
         '<div class="field"><input type="text" id="gSchool" placeholder="학교명 (선택)" /></div>'+
+        '<label class="agree"><input type="checkbox" id="gAgree" /><span>개인정보 수집·이용에 동의합니다. <b>(필수)</b></span><button type="button" class="agree-more" id="gAgreeMore">자세히</button></label>'+
+        '<div class="agree-detail" id="gAgreeDetail" hidden>'+
+          '<p><b>수집 항목</b> 이메일, 연락처, 학교명(선택), 선택하신 조건(프로그램 유형·예산·학년·인원·수업 형태·시간)</p>'+
+          '<p><b>수집 목적</b> 프로그램 추천 및 상담·견적 안내</p>'+
+          '<p><b>보유 기간</b> 상담 완료 후 3개월 이내 파기</p>'+
+          '<p>동의를 거부할 수 있으나, 거부 시 추천 요청을 보낼 수 없습니다.</p>'+
+        '</div>'+
         '<button class="mini-cta" id="gSend" disabled>추천 요청 보내기</button>'+
       '</div>'+
       '<div style="padding:22px 0 20px;"><button class="cta ghost" id="resetBtn">처음부터 다시하기</button></div>'+
     '</div>'+
     '<div class="modal-ov" id="modalOv"><div class="modal" id="modalBox"></div></div>';
 
-    var em=document.getElementById('gEmail'),ph=document.getElementById('gPhone'),sc=document.getElementById('gSchool'),sd=document.getElementById('gSend');
-    function chk(){ sd.disabled=!(/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em.value.trim()) && ph.value.replace(/[^0-9]/g,'').length>=9); }
-    em.addEventListener('input',chk); ph.addEventListener('input',chk);
+    var em=document.getElementById('gEmail'),ph=document.getElementById('gPhone'),sc=document.getElementById('gSchool'),sd=document.getElementById('gSend'),ag=document.getElementById('gAgree');
+    function chk(){ sd.disabled=!(/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em.value.trim()) && ph.value.replace(/[^0-9]/g,'').length>=9 && ag.checked); }
+    em.addEventListener('input',chk); ph.addEventListener('input',chk); ag.addEventListener('change',chk);
+    document.getElementById('gAgreeMore').addEventListener('click',function(e){ e.preventDefault(); var d=document.getElementById('gAgreeDetail'); d.hidden=!d.hidden; });
     sd.addEventListener('click',function(){ sendLead(em.value.trim(),ph.value.trim(),sc.value.trim(),recs,sd); });
     function openForm(){
       var g=document.getElementById('getmail'); g.classList.remove('hidden');
@@ -973,7 +988,8 @@
       '문의 프로그램':picked||'-',
       '화면에 보여준 추천':recs[0]?recs[0][0]:'없음',
       '프로그램 유형':a.program,'예산':a.budget,'학교급·학년':a.grade,'대상 인원':a.scale,'수업 형태':a.format,'진행 시간':a.period,
-      '이메일':email,'연락처':phone,'학교명':school||'-' };
+      '이메일':email,'연락처':phone,'학교명':school||'-',
+      '개인정보 수집·이용 동의':'동의함 ('+new Date().toLocaleString('ko-KR')+')' };
     track('lead_submit',{program:a.program});
     btn.disabled=true; btn.textContent='보내는 중...';
     var to=CONFIG.cobraEmail;
